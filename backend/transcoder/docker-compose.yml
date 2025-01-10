@@ -1,0 +1,17 @@
+services:
+  transcoder:
+    image: transcoder
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 5000:5000
+    volumes:
+      - .:/app
+      - ./videos:/app/videos # Ensure videos are mounted
+      - transcoder_node_modules:/app/node_modules
+    env_file:
+      - .env
+    command: npm run dev
+volumes:
+  transcoder_node_modules:
