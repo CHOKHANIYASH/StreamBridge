@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import { FileUpload } from "@/components/ui/file-upload";
-import { BackgroundGradient } from "@/components/ui/background-gradient";
 
 export default function Upload() {
   const [files, setFiles] = useState([]);
