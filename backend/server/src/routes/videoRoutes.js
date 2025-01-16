@@ -5,6 +5,7 @@ const {
   isValidUser,
 } = require("../middlewares/middleware");
 const videoControllers = require("../controllers/videoControllers");
+const { v4: uuidv4 } = require("uuid");
 router.get(
   "/",
   handleAsyncError(async (req, res) => {
@@ -24,7 +25,7 @@ router.post(
   "/upload",
   // isValidUser,
   handleAsyncError(async (req, res) => {
-    const { contentType, userId } = req.body;
+    const { contentType, userId, name } = req.body;
     if (contentType !== "video/mp4")
       throw new AppError("Only Mp4 files are allowed", 400);
     const key = `${userId}_${new Date().toISOString()}.${
@@ -33,6 +34,8 @@ router.post(
     const url = await videoControllers.preSignedUploadUrl({
       key,
     });
+    const videoId = uuidv4();
+    await videoControllers.addVideoBuffer({ videoId, name, userId });
     res.status(200).send({
       success: true,
       message: "upload using the following url and key within 60 minutes",
