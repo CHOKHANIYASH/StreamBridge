@@ -9,10 +9,13 @@ const { AppError } = require("../middlewares/middleware");
 
 const signup = async ({ userId, email, firstName, lastName }) => {
   const command = new PutItemCommand({
-    id: userId,
-    email,
-    firstName,
-    lastName,
+    TableName: "streambridge_user",
+    Item: {
+      id: { S: userId },
+      email: { S: email },
+      firstname: { S: firstName },
+      lastname: { S: lastName },
+    },
   });
   const response = await dynamodbClient.send(command);
   return {
@@ -26,10 +29,9 @@ const signup = async ({ userId, email, firstName, lastName }) => {
 };
 
 const getUser = async ({ userId }) => {
-  const key = marshall({ userId });
   const command = new GetItemCommand({
     TableName: "streambridge_user",
-    Key: key,
+    Key: { id: { S: userId } },
   });
   const response = await dynamodbClient.send(command);
   if (!response.Item) {
@@ -47,17 +49,13 @@ const getUser = async ({ userId }) => {
 };
 
 const deleteUser = async ({ userId }) => {
-  const key = marshall({ userId });
   const command = new DeleteItemCommand({
     TableName: "streambridge_user",
-    Key: key,
+    Key: { id: { S: userId } },
   });
   const response = await dynamodbClient.send(command);
-  if (!response.Item) {
-    throw new AppError("User not found", 404);
-  }
   return {
-    status: 204,
+    status: 200,
     response: {
       success: true,
       message: "User deleted",

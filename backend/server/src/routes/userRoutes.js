@@ -1,8 +1,8 @@
-const router = require("express").router();
+const router = require("express").Router();
 const {
   handleAsyncError,
   AppError,
-  isValiduser,
+  isValidUser,
 } = require("../middlewares/middleware");
 const userControllers = require("../controllers/userControllers");
 
@@ -17,7 +17,7 @@ router.get(
   "/:userId",
   handleAsyncError(async (req, res) => {
     const userId = req.params.userId;
-    const { response, status } = userControllers.getUser({ userId });
+    const { response, status } = await userControllers.getUser({ userId });
     res.status(status).send(response);
   })
 );
@@ -39,10 +39,10 @@ router.post(
 );
 
 router.post(
-  "/delete/:userId",
-  isValiduser,
+  "/delete",
+  // isValidUser,
   handleAsyncError(async (req, res) => {
-    const userId = req.params.userId;
+    const userId = req.body.userId;
     if (!userId) throw new AppError("User Id is required", 400);
     const { response, status } = await userControllers.deleteUser({ userId });
     res.status(status).send(response);
