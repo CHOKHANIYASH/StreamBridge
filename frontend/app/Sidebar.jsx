@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import {
   IconArrowLeft,
@@ -9,48 +9,63 @@ import {
   IconLogin,
   IconUserPlus,
   IconVideo,
+  IconUpload,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { AuthContext } from "./AuthContext";
 export default function SideBar({ children }) {
+  const { isAuthenticated } = useContext(AuthContext);
   const links = [
     {
       label: "Home",
       href: "/",
       icon: (
-        <IconBrandTabler className="text-deepCharcoal dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <IconBrandTabler className="flex-shrink-0 w-5 h-5 text-deepCharcoal dark:text-neutral-200" />
       ),
     },
     {
       label: "Dashboard",
       href: "#",
       icon: (
-        <IconUserBolt className="text-deepCharcoal dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <IconUserBolt className="flex-shrink-0 w-5 h-5 text-deepCharcoal dark:text-neutral-200" />
       ),
     },
     {
-      label: "Login",
-      href: "/login",
+      label: "Upload",
+      href: "/video/upload",
       icon: (
-        <IconLogin className="text-deepCharcoal dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+        <IconUpload className="flex-shrink-0 w-5 h-5 text-deepCharcoal dark:text-neutral-200" />
       ),
     },
-    {
-      label: "signup",
-      href: "/signup",
-      icon: (
-        <IconUserPlus className="text-deepCharcoal dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
-      label: "Logout",
-      href: "#",
-      icon: (
-        <IconArrowLeft className="text-deepCharcoal dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
+    ...(!isAuthenticated
+      ? [
+          {
+            label: "Login",
+            href: "/login",
+            icon: (
+              <IconLogin className="flex-shrink-0 w-5 h-5 text-deepCharcoal dark:text-neutral-200" />
+            ),
+          },
+          {
+            label: "Signup",
+            href: "/signup",
+            icon: (
+              <IconUserPlus className="flex-shrink-0 w-5 h-5 text-deepCharcoal dark:text-neutral-200" />
+            ),
+          },
+        ]
+      : [
+          {
+            label: "Logout",
+            href: "/logout",
+            icon: (
+              <IconArrowLeft className="flex-shrink-0 w-5 h-5 text-deepCharcoal dark:text-neutral-200" />
+            ),
+          },
+        ]),
   ];
   const [open, setOpen] = useState(false);
   return (
@@ -61,10 +76,10 @@ export default function SideBar({ children }) {
       )}
     >
       <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10 bg-royalBlue dark:bg-royalBlue ">
-          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+        <SidebarBody className="z-50 justify-between gap-10 bg-royalBlue dark:bg-royalBlue">
+          <div className="flex flex-col flex-1 overflow-x-hidden overflow-y-auto">
             {open ? <Logo /> : <IconVideo />}
-            <div className="mt-8 flex flex-col gap-2 ">
+            <div className="flex flex-col gap-2 mt-8 ">
               {links.map((link, idx) => (
                 <SidebarLink key={idx} link={link} />
               ))}
@@ -80,14 +95,14 @@ export const Logo = () => {
   return (
     <Link
       href="#"
-      className="font-normal flex space-x-2 items-center text-sm text-charcoalGray py-1 relative z-20"
+      className="relative z-20 flex items-center py-1 space-x-2 text-sm font-normal text-charcoalGray"
     >
-      <div className="h-5 w-6 bg-grayishWhite dark:bg-grayishWhite rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+      <div className="flex-shrink-0 w-6 h-5 rounded-tl-lg rounded-tr-sm rounded-bl-sm rounded-br-lg bg-grayishWhite dark:bg-grayishWhite" />
       <IconVideo />
       <motion.span
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="font-medium text-charcoalGray dark:text-white whitespace-pre"
+        className="font-medium whitespace-pre text-charcoalGray dark:text-white"
       >
         Stream Bridge
       </motion.span>
@@ -98,9 +113,9 @@ export const LogoIcon = () => {
   return (
     <Link
       href="#"
-      className="font-normal flex space-x-2 items-center text-sm text-charcoalGray py-1 relative z-20"
+      className="relative z-20 flex items-center py-1 space-x-2 text-sm font-normal text-charcoalGray"
     >
-      <div className="h-5 w-6 bg-grayishWhite dark:bg-grayishWhite rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0" />
+      <div className="flex-shrink-0 w-6 h-5 rounded-tl-lg rounded-tr-sm rounded-bl-sm rounded-br-lg bg-grayishWhite dark:bg-grayishWhite" />
     </Link>
   );
 };
