@@ -1,6 +1,8 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import SideBar from "./Sidebar";
+import AmplifyConfig from "./Amplify";
+import { AuthProvider } from "./AuthContext";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -24,7 +26,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-lightGrayishWhite`}
       >
-        <SideBar>{children}</SideBar>
+        <AmplifyConfig />
+        <AuthProvider>
+          <SideBar>{children}</SideBar>
+        </AuthProvider>
       </body>
     </html>
   );
