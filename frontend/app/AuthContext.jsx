@@ -7,14 +7,18 @@ const AuthProvider = ({ children }) => {
     getCurrentUser()
       .then((user) => {
         if (user) {
-          isAuthenticated(true);
+          setIsAuthenticated(true);
+          setUserId(user.userId);
         }
       })
       .catch((err) => {});
   }, []);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userId, setUserId] = useState("");
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
+    <AuthContext.Provider
+      value={{ userId, setUserId, isAuthenticated, setIsAuthenticated }}
+    >
       {children}
     </AuthContext.Provider>
   );

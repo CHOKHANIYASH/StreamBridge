@@ -1,4 +1,5 @@
 "use client";
+import "react-toastify/dist/ReactToastify.css";
 import React, { useState, useContext } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import {
@@ -12,6 +13,7 @@ import {
   IconUpload,
 } from "@tabler/icons-react";
 import Link from "next/link";
+import { ToastContainer } from "react-toastify";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -87,7 +89,10 @@ export default function SideBar({ children }) {
           </div>
         </SidebarBody>
       </Sidebar>
-      <div className="flex-1">{children}</div>
+      <div className="flex-1">
+        <ToastContainer autoClose={2000} />
+        {children}
+      </div>
     </div>
   );
 }
