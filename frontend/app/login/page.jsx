@@ -14,7 +14,7 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { setIsAuthenticated } = useContext(AuthContext);
+  const { setIsAuthenticated, setUserId } = useContext(AuthContext);
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -26,6 +26,7 @@ export default function Login() {
       const user = await getCurrentUser();
       setLoading(false);
       setIsAuthenticated(true);
+      setUserId(user.userId);
       router.push(`/dashboard/${user.userId}`);
     } catch (err) {
       console.log(err);
