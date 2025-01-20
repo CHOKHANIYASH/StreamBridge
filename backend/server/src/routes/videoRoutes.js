@@ -24,14 +24,18 @@ router.get(
     res.send("Hello from Video Route");
   })
 );
+
 router.get(
   "/user/:userId",
   handleAsyncError(async (req, res) => {
     const { userId } = req.params;
-    const { response, status } = videoControllers.getUserVideos({ userId });
+    const { response, status } = await videoControllers.getUserVideos({
+      userId,
+    });
     res.status(status).send(response);
   })
 );
+
 router.get(
   "/:videoId",
   handleAsyncError(async (req, res) => {
@@ -40,6 +44,7 @@ router.get(
     res.status(status).send(response);
   })
 );
+
 router.post(
   "/upload",
   // isValidUser,
@@ -60,12 +65,13 @@ router.post(
     });
   })
 );
+
 router.post(
   "/success",
   // isAdmin,
   handleAsyncError(async (req, res) => {
     const { key } = req.body;
-    const { email, url } = videoControllers.addVideo({ key });
+    const { email, url } = await videoControllers.addVideo({ key });
     // await userController.sendMail({ email, url });
     res.send("success");
   })

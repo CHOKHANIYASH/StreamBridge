@@ -5,7 +5,11 @@ const {
   PutObjectCommand,
   HeadObjectCommand,
 } = require("@aws-sdk/client-s3");
-const { PutItemCommand, GetItemCommand } = require("@aws-sdk/client-dynamodb");
+const {
+  PutItemCommand,
+  GetItemCommand,
+  QueryCommand,
+} = require("@aws-sdk/client-dynamodb");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
 
@@ -54,10 +58,38 @@ const getVideo = async ({ videoId }) => {
   };
 };
 
+const getUserVideos = async ({ userId }) => {
+  console.log(userId);
+  const command = new QueryCommand({
+    TableName: "streambridge_videos",
+    IndexName: "userId-index",
+    KeyConditionExpression: "userId = :userId",
+    ExpressionAttributeValues: {
+      ":userId": { S: userId },
+    },
+    ScanIndexForward: false,
+  });
+
+  const response = await dynamodbClient.send(command);
+  const arr = response.Items;
+  videos = arr.map((video) => {
+    return unmarshall(video);
+  });
+  return {
+    status: 200,
+    response: {
+      success: true,
+      message: "User Videos found",
+      data: { videos },
+    },
+  };
+};
+
 const getObjectUrl = async ({ Key }) => {
   const s3ObjectUrl = `${process.env.CLOUDFRONT_URL}/${Key}`;
   return s3ObjectUrl;
 };
+
 const addVideo = async ({ key }) => {
   const command = new GetItemCommand({
     TableName: "streambridge_buffer",
@@ -94,4 +126,5 @@ module.exports = {
   addVideoBuffer,
   addVideo,
   getVideo,
+  getUserVideos,
 };
