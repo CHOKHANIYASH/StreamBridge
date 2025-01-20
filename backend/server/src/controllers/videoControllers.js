@@ -9,9 +9,11 @@ const {
   PutItemCommand,
   GetItemCommand,
   QueryCommand,
+  DeleteItemCommand,
 } = require("@aws-sdk/client-dynamodb");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
+const { AppError } = require("../middlewares/middleware");
 
 const preSignedUploadUrl = async ({ key }) => {
   const command = new PutObjectCommand({
@@ -119,6 +121,11 @@ const addVideo = async ({ key }) => {
     },
   });
   const putResponse = await dynamodbClient.send(putCommand);
+  const deleteCommand = new DeleteItemCommand({
+    TableName: "streambridge_buffer",
+    Key: { videoId: { S: key } },
+  });
+  const deleteResponse = await dynamodbClient.send(deleteCommand);
   return { url, email: user.email };
 };
 module.exports = {

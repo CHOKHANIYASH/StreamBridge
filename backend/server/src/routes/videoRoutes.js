@@ -3,30 +3,22 @@ const {
   handleAsyncError,
   AppError,
   isValidUser,
+  isAdmin,
 } = require("../middlewares/middleware");
 const videoControllers = require("../controllers/videoControllers");
 const userController = require("../controllers/userControllers");
-const { v4: uuidv4 } = require("uuid");
 const short = require("short-uuid");
 
 router.get(
   "/",
   handleAsyncError(async (req, res) => {
-    // const response = await videoControllers.getObject({
-    //   Bucket: "chokhaniyash-streambridge-hls-transcoded",
-    //   Key: "ShangChi.mp4",
-    // });
-    // if (response.message) res.send(response.message);
-    // else {
-    //   res.set("content-type", response.ContentType);
-    //   response.Body.pipe(res);
-    // }
     res.send("Hello from Video Route");
   })
 );
 
 router.get(
   "/user/:userId",
+  // isValidUser,
   handleAsyncError(async (req, res) => {
     const { userId } = req.params;
     const { response, status } = await videoControllers.getUserVideos({
@@ -68,7 +60,7 @@ router.post(
 
 router.post(
   "/success",
-  // isAdmin,
+  isAdmin,
   handleAsyncError(async (req, res) => {
     const { key } = req.body;
     const { email, url } = await videoControllers.addVideo({ key });
