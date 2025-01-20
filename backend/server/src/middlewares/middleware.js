@@ -23,4 +23,11 @@ const isValidUser = handleAsyncError(async (req, res, next) => {
   next();
 });
 
-module.exports = { AppError, handleAsyncError, isValidUser };
+const isAdmin = handleAsyncError(async (req, res, next) => {
+  const code = req.body.adminCode;
+  if (code !== process.env.ADMIN_CODE)
+    throw new AppError("Only Admin Requests is allowed", 400);
+  next();
+});
+
+module.exports = { AppError, handleAsyncError, isValidUser, isAdmin };
