@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { IconUpload } from "@tabler/icons-react";
 import { useDropzone } from "react-dropzone";
@@ -25,11 +25,21 @@ const secondaryVariant = {
   },
 };
 
-export const FileUpload = ({ onChange }) => {
+export const FileUpload = ({ onChange, submit }) => {
+  useEffect(() => {
+    if (submit) {
+      setFiles([]);
+    }
+  }, [submit]);
+
   const [files, setFiles] = useState([]);
   const fileInputRef = useRef(null);
 
   const handleFileChange = (newFiles) => {
+    if (newFiles[0].size > 500 * 1024 * 1024) {
+      alert("File size is too large. Please upload a file smaller than 500MB.");
+      return;
+    }
     if (newFiles[0].type === "video/mp4") {
       setFiles((prevFiles) => [...prevFiles, ...newFiles]);
     }

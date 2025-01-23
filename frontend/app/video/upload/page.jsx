@@ -5,10 +5,13 @@ import { FileUpload } from "@/components/ui/file-upload";
 import axios from "axios";
 import { AuthContext } from "@/app/AuthContext";
 import { toast } from "react-toastify";
-export default function Upload() {
+import ProtectedRoute from "@/app/ProtectedRoute";
+function Upload() {
   const [files, setFiles] = useState([]);
   const { userId } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
+  const [submit, setSubmit] = useState(false);
+  // console.log(userId);
   const handleFileUpload = (newFiles) => {
     if (newFiles[0].type !== "video/mp4") {
       toast.error("Only mp4 files are allowed", {
@@ -22,6 +25,7 @@ export default function Upload() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setSubmit(true);
     await Promise.all(
       files.map(async (file) => {
         try {
@@ -29,7 +33,7 @@ export default function Upload() {
             `${process.env.NEXT_PUBLIC_SERVER_URL}/video/upload`,
             {
               contentType: file.type,
-              name: file.name,
+              name: file.name.substring(0, file.name.length - 4),
               userId,
             }
           );
@@ -48,7 +52,8 @@ export default function Upload() {
         }
       })
     );
-
+    setFiles([]);
+    setSubmit(false);
     toast.info("All files processed!");
   };
 
@@ -56,7 +61,7 @@ export default function Upload() {
     <form onSubmit={handleSubmit}>
       <div className="flex flex-col items-center justify-center min-h-screen max-md:p-4 ">
         <div className="w-full max-w-4xl mx-auto bg-white border-2 border-dashed rounded-lg min-h-96 border-royalBlue dark:bg-black dark:border-neutral-800">
-          <FileUpload onChange={handleFileUpload} />
+          <FileUpload onChange={handleFileUpload} submit={submit} />
         </div>
 
         {!loading ? (
@@ -73,3 +78,5 @@ export default function Upload() {
     </form>
   );
 }
+
+export default ProtectedRoute(Upload);
