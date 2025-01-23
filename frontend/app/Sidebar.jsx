@@ -19,7 +19,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { AuthContext } from "./AuthContext";
 export default function SideBar({ children }) {
-  const { isAuthenticated } = useContext(AuthContext);
+  const { userId, isAuthenticated } = useContext(AuthContext);
   const links = [
     {
       label: "Home",
@@ -30,7 +30,7 @@ export default function SideBar({ children }) {
     },
     {
       label: "Dashboard",
-      href: "#",
+      href: userId === "" ? "/dashboard/1" : `/dashboard/${userId}`,
       icon: (
         <IconUserBolt className="flex-shrink-0 w-5 h-5 text-deepCharcoal dark:text-neutral-200" />
       ),
