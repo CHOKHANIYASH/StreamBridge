@@ -44,7 +44,7 @@ router.post(
     const { contentType, userId, name, email } = req.body;
     if (contentType !== "video/mp4")
       throw new AppError("Only Mp4 files are allowed", 400);
-    const key = `${userId}_${short.generate()}.${contentType.split("/")[1]}`;
+    const key = `${short.generate()}.${contentType.split("/")[1]}`;
     const url = await videoControllers.preSignedUploadUrl({
       key,
     });
@@ -59,14 +59,33 @@ router.post(
 );
 
 router.post(
+  "/delete/:videoId",
+  // isValidUser,
+  handleAsyncError(async (req, res) => {
+    const { videoId } = req.params;
+    const { response, status } = await videoControllers.deleteVideo({
+      videoId,
+    });
+    res.status(status).send(response);
+  })
+);
+
+router.post(
   "/success",
   isAdmin,
   handleAsyncError(async (req, res) => {
     const { key } = req.body;
+    console.log(key);
     const { email, url } = await videoControllers.addVideo({ key });
     // await userController.sendMail({ email, url });
     res.send("success");
   })
+);
+
+router.post(
+  "/fail",
+  isAdmin,
+  handleAsyncError(async (req, res) => {})
 );
 
 module.exports = router;

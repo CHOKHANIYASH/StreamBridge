@@ -13,6 +13,7 @@ const {
 } = require("@aws-sdk/client-dynamodb");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
+const { format } = require("date-fns");
 const { AppError } = require("../middlewares/middleware");
 
 const preSignedUploadUrl = async ({ key }) => {
@@ -110,14 +111,16 @@ const addVideo = async ({ key }) => {
   const userResponse = await dynamodbClient.send(userCommand);
   const user = unmarshall(userResponse.Item);
   const url = await getObjectUrl({ Key: key });
+  const createdAt = format(new Date(), "yyyy-MM-dd HH:mm:ss");
   const putCommand = new PutItemCommand({
     TableName: "streambridge_videos",
     Item: {
       id: { S: key },
       name: { S: video.name },
       userId: { S: user.id },
-      userName: { S: user.firstname },
+      username: { S: user.firstName },
       url: { S: url },
+      createdAt: { S: createdAt },
     },
   });
   const putResponse = await dynamodbClient.send(putCommand);
@@ -128,10 +131,41 @@ const addVideo = async ({ key }) => {
   const deleteResponse = await dynamodbClient.send(deleteCommand);
   return { url, email: user.email };
 };
+
+const deleteVideo = async ({ videoId }) => {
+  const command = new GetItemCommand({
+    TableName: "streambridge_videos",
+    Key: { id: { S: videoId } },
+  });
+  const response = await dynamodbClient.send(command);
+  if (!response.Item) {
+    throw new AppError("Video not found", 404);
+  }
+  const deleteObjectCommand = new DeleteObjectCommand({
+    Bucket: process.env.S3_BUCKET,
+    Key: videoId,
+  });
+  const deleteObjectResponse = await s3Client.send(deleteObjectCommand);
+  const deleteDbCommand = new DeleteItemCommand({
+    TableName: "streambridge_videos",
+    Key: { id: { S: videoId } },
+  });
+  const dbResponse = await dynamodbClient.send(deleteDbCommand);
+  return {
+    status: 200,
+    response: {
+      success: true,
+      message: "Video Deleted Successfully",
+      data: {},
+    },
+  };
+};
+
 module.exports = {
   preSignedUploadUrl,
   addVideoBuffer,
   addVideo,
   getVideo,
   getUserVideos,
+  deleteVideo,
 };
