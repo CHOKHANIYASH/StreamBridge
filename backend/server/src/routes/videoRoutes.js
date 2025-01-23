@@ -42,6 +42,7 @@ router.post(
   // isValidUser,
   handleAsyncError(async (req, res) => {
     const { contentType, userId, name, email } = req.body;
+    if (!userId) throw new AppError("User not found", 404);
     if (contentType !== "video/mp4")
       throw new AppError("Only Mp4 files are allowed", 400);
     const key = `${short.generate()}.${contentType.split("/")[1]}`;

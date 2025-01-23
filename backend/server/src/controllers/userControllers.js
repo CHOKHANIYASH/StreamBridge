@@ -13,8 +13,8 @@ const signup = async ({ userId, email, firstName, lastName }) => {
     Item: {
       id: { S: userId },
       email: { S: email },
-      firstname: { S: firstName },
-      lastname: { S: lastName },
+      firstName: { S: firstName },
+      lastName: { S: lastName },
     },
   });
   const response = await dynamodbClient.send(command);
