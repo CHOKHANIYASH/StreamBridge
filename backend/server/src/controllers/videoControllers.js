@@ -1,9 +1,11 @@
 const { s3Client, dynamodbClient } = require("../aws/clients");
 const {
   DeleteObjectCommand,
+  DeleteObjectsCommand,
   GetObjectCommand,
   PutObjectCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
 } = require("@aws-sdk/client-s3");
 const {
   PutItemCommand,
@@ -141,11 +143,14 @@ const deleteVideo = async ({ videoId }) => {
   if (!response.Item) {
     throw new AppError("Video not found", 404);
   }
-  const deleteObjectCommand = new DeleteObjectCommand({
+  const keys = await listObjects({ videoId });
+  const deleteObjectCommand = new DeleteObjectsCommand({
     Bucket: process.env.S3_BUCKET,
-    Key: videoId,
+    Delete: {
+      Objects: keys.map((k) => ({ Key: k })),
+    },
   });
-  const deleteObjectResponse = await s3Client.send(deleteObjectCommand);
+  await s3Client.send(deleteObjectCommand);
   const deleteDbCommand = new DeleteItemCommand({
     TableName: "streambridge_videos",
     Key: { id: { S: videoId } },
@@ -159,6 +164,24 @@ const deleteVideo = async ({ videoId }) => {
       data: {},
     },
   };
+};
+const listObjects = async ({ videoId }) => {
+  const resolutions = ["1080p", "720p", "480p", "360p"];
+  const keys = [];
+  for (let i = 0; i < resolutions.length; i++) {
+    const key = `${videoId}/${resolutions[i]}`;
+    const command = new ListObjectsV2Command({
+      Bucket: process.env.S3_BUCKET,
+      Prefix: key,
+    });
+    const response = await s3Client.send(command);
+    if (response.Contents) {
+      response.Contents.forEach((object) => {
+        keys.push(object.Key);
+      });
+    }
+  }
+  return keys;
 };
 
 module.exports = {
