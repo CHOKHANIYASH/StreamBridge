@@ -10,7 +10,7 @@ require("dotenv").config();
 
 const fs = require("fs");
 const path = require("path");
-
+const axios = require("axios");
 const ffmpeg = require("fluent-ffmpeg");
 const { exit } = require("node:process");
 const resolutions = [
@@ -25,8 +25,6 @@ async function transcoder() {
   const Key = process.env.OBJECT_KEY;
   const Bucket = process.env.UPLOAD_BUCKET;
   const bufferBucket = process.env.BUFFER_BUCKET;
-  const sqsQueueUrl = process.env.AWS_SQS_URL;
-  const ReceiptHandle = process.env.RECIEPT_HANDLE;
   console.log("Hello from Transcoder");
 
   // extract the video from Bucket
@@ -127,12 +125,16 @@ async function transcoder() {
   });
 
   // Execute all Upload promises
-  await Promise.all(uploadPromises).then(() => {
+  await Promise.all(uploadPromises).then(async () => {
     console.log("Uploading Done Successfully");
   });
 
   // delete video from buffer bucket
   await deleteObject({ Bucket: bufferBucket, Key });
+  await axios.post(`${process.env.SERVER_URL}/video/success`, {
+    key: Key,
+    adminCode: process.env.ADMIN_CODE,
+  });
 
   // call lambda function for success
 }
@@ -140,8 +142,12 @@ transcoder()
   .then(() => {
     console.log("transcoding done successfully");
   })
-  .catch((err) => {
+  .catch(async (err) => {
     console.error("Error occurred:", err);
+    await axios.post(`${process.env.SERVER_URL}/video/fail`, {
+      key: Key,
+      adminCode: process.env.ADMIN_CODE,
+    });
   })
   .finally(() => {
     process.exit(0);
