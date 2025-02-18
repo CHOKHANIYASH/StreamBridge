@@ -131,7 +131,7 @@ const addVideo = async ({ key }) => {
     Key: { videoId: { S: key } },
   });
   const deleteResponse = await dynamodbClient.send(deleteCommand);
-  return { url, email: user.email };
+  return { url, email: user.email,name:video.name };
 };
 
 const deleteVideo = async ({ videoId }) => {

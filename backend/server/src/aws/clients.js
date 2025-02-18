@@ -7,8 +7,5 @@ const dynamodbClient = new DynamoDBClient({
 const s3Client = new S3Client({
   region: "ap-south-1",
 });
-const sesClient = new SESClient({
-  region: "ap-south-1",
-});
 
-module.exports = { dynamodbClient, s3Client, sesClient };
+module.exports = { dynamodbClient, s3Client };

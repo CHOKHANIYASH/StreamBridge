@@ -5,6 +5,7 @@ const {
   isValidUser,
 } = require("../middlewares/middleware");
 const userControllers = require("../controllers/userControllers");
+const { welcomeMail } = require("../middlewares/email");
 
 router.get(
   "/",
@@ -34,6 +35,7 @@ router.post(
       firstName,
       lastName,
     });
+    await welcomeMail(email);
     res.status(status).send(response);
   })
 );

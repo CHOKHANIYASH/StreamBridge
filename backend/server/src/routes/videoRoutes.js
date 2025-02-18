@@ -8,6 +8,7 @@ const {
 const videoControllers = require("../controllers/videoControllers");
 const userController = require("../controllers/userControllers");
 const short = require("short-uuid");
+const { successMail } = require("../middlewares/email");
 
 router.get(
   "/",
@@ -77,8 +78,8 @@ router.post(
   handleAsyncError(async (req, res) => {
     const { key } = req.body;
     console.log(key);
-    const { email, url } = await videoControllers.addVideo({ key });
-    // await userController.sendMail({ email, url });
+    const { email, url, name } = await videoControllers.addVideo({ key });
+    await successMail(email, name);
     res.send("success");
   })
 );

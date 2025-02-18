@@ -30,6 +30,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.10.0",
     "serverless-http": "^3.2.0",
     "short-uuid": "^5.2.0",
     "uuid": "^10.0.0"
