@@ -21,26 +21,43 @@ import {
 } from "@/components/ui/dropdown-menu";
 function Dashboard() {
   const router = useRouter();
-  const { userId } = React.useContext(AuthContext);
+  const { userId, getAccessToken } = React.useContext(AuthContext);
   const [videos, setVideos] = useState([]);
   useEffect(() => {
-    if (userId == "") return;
-    axios
-      .get(`${process.env.NEXT_PUBLIC_SERVER_URL}/video/user/${userId}`)
-      .then((res) => {
-        setVideos(res.data.data.videos);
-      })
-      .catch((err) => {
-        console.log(err);
+    if (!userId) return;
+
+    const fetchVideos = async () => {
+      try {
+        const accessToken = await getAccessToken();
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_SERVER_URL}/video/user/${userId}`,
+          {
+            headers: {
+              access_token: accessToken,
+            },
+          }
+        );
+        setVideos(response.data.data.videos);
+      } catch (error) {
+        console.error("Error fetching videos:", error);
         toast.error("Error fetching videos");
-      });
+      }
+    };
+
+    fetchVideos();
   }, [userId]);
   // const router = useRouter();
   const [name, setName] = useState("");
   const handleDelete = async (videoId) => {
     try {
+      const accessToken = await getAccessToken();
       await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/video/delete/${videoId}`
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/video/delete/${videoId}`,
+        {
+          headers: {
+            access_token: accessToken,
+          },
+        }
       );
       setVideos(videos.filter((video) => video.id !== videoId));
       toast.success("Video deleted successfully");
