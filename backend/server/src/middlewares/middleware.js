@@ -1,5 +1,10 @@
 const jwt = require("jsonwebtoken");
-
+const { CognitoJwtVerifier } = require("aws-jwt-verify");
+const verifier = CognitoJwtVerifier.create({
+  userPoolId: process.env.COGNITO_USER_POOL_ID,
+  tokenUse: "access",
+  clientId: process.env.COGNITO_CLIENT_ID,
+});
 class AppError extends Error {
   constructor(message, status) {
     super();
@@ -16,10 +21,13 @@ const handleAsyncError = (fn) => (req, res, next) => {
 const isValidUser = handleAsyncError(async (req, res, next) => {
   const userId = req.body.userId || req.params.userId;
   const access_token = req.headers.access_token;
+  // console.log(access_token);
   if (!access_token) throw new AppError("Unauthorized", 401);
-  const decoded = jwt.decode(access_token, { complete: true });
-  if (!decoded) throw new AppError("unauthorized", 401);
-  if (userId !== decoded.payload.sub) throw new AppError("unauthorized", 401);
+  const payload = await verifier.verify(access_token).catch((err) => {
+    throw new AppError("Unauthorized", 401);
+  });
+  if (!payload) throw new AppError("Unauthorized", 401);
+  if (userId !== payload.sub) throw new AppError("unauthorized", 401);
   next();
 });
 
