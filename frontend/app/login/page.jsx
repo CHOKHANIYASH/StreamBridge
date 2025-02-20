@@ -8,6 +8,7 @@ import Image from "next/image";
 import Loader from "react-js-loader";
 import { signIn, getCurrentUser } from "aws-amplify/auth";
 import { AuthContext } from "../AuthContext";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const router = useRouter();
@@ -27,9 +28,15 @@ export default function Login() {
       setLoading(false);
       setIsAuthenticated(true);
       setUserId(user.userId);
+      toast.success("Login Successful", {
+        toastId: "uniqueToastLogin",
+      });
       router.push(`/dashboard/${user.userId}`);
     } catch (err) {
       console.log(err);
+      toast.error(err.message, {
+        toastId: "uniqueToastLogin",
+      });
     }
     console.log("Form submitted");
   };

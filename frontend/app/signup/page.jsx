@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Loader from "react-js-loader";
 import axios from "axios";
-import { signUp, confirmSignUp } from "aws-amplify/auth";
+import { signUp, confirmSignUp, autoSignIn } from "aws-amplify/auth";
 import { AuthContext } from "../AuthContext";
+import { toast } from "react-toastify";
 export default function Signup() {
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
@@ -30,15 +31,22 @@ export default function Signup() {
           userAttributes: {
             email,
           },
+          autoSignIn: true,
         },
-        autoSignIn: true,
       });
       setUserId(userId);
       setSignupConfirm(true);
       setLoading(false);
+      toast.info("Verification Code has been send to your emailid", {
+        toastId: "uniqueToastSignup",
+      });
       console.log("Form submitted");
     } catch (err) {
-      console.log(err);
+      // console.log(err.message);
+      toast.error(err.message, {
+        toastId: "uniqueToastSignup",
+      });
+      setLoading(false);
     }
   };
   const handleConfirmSignUp = async (e) => {
@@ -52,24 +60,37 @@ export default function Signup() {
       await saveUser();
       setLoading(false);
     } catch (err) {
-      console.log(err);
+      toast.error(err.message, {
+        toastId: "uniqueToastSignup",
+      });
+      // console.log(err);
+      setLoading(false);
     }
   };
   const saveUser = async () => {
-    axios
-      .post(`${process.env.NEXT_PUBLIC_SERVER_URL}/user/signup`, {
+    try {
+      await axios.post(`${process.env.NEXT_PUBLIC_SERVER_URL}/user/signup`, {
         firstName,
         lastName,
         email,
         userId,
-      })
-      .then(() => {
-        setIsAuthenticated(true);
-        router.push(`/dashboard/${userId}`);
-      })
-      .catch((err) => {
-        console.log(err);
       });
+
+      setIsAuthenticated(true);
+      setUserId(userId);
+      await autoSignIn();
+
+      toast.success("User Registered Successfully", {
+        toastId: "uniqueToastSignup",
+      });
+
+      router.push(`/dashboard/${userId}`);
+    } catch (err) {
+      console.error("Error during signup:", err);
+      toast.error("Signup failed. Please try again.", {
+        toastId: "uniqueToastSignup",
+      });
+    }
   };
   return (
     <div className="flex flex-col items-center justify-center min-h-screen md:flex-row bg-neutral-100 dark:bg-black max-md:m-10 max-md:mt-0">
