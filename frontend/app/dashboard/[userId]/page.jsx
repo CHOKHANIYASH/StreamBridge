@@ -112,6 +112,13 @@ function Dashboard() {
                           <DropdownMenuContent>
                             <DropdownMenuItem
                               onClick={() =>
+                                copyTextToClipboard(`${video.url}/master.m3u8`)
+                              }
+                            >
+                              Auto
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
                                 copyTextToClipboard(
                                   `${video.url}/1080p/index.m3u8`
                                 )

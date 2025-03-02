@@ -109,7 +109,7 @@ export const Logo = () => {
         animate={{ opacity: 1 }}
         className="font-medium whitespace-pre text-charcoalGray dark:text-white"
       >
-        Stream Bridge
+        StreamBridge
       </motion.span>
     </Link>
   );

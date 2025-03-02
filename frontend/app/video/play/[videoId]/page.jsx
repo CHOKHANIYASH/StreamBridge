@@ -12,7 +12,7 @@ import axios from "axios";
 export default function page() {
   const playerRef = useRef(null);
   const [video, setVideo] = React.useState("");
-  const [resolution, setResolution] = React.useState("1080p");
+  const [resolution, setResolution] = React.useState("Auto");
   useEffect(() => {
     const videoId = window.location.pathname.split("/")[3];
     axios
@@ -31,7 +31,10 @@ export default function page() {
     responsive: true,
     sources: [
       {
-        src: video.url + `/${resolution}/index.m3u8`,
+        src:
+          resolution === "Auto"
+            ? video.url + `/master.m3u8`
+            : video.url + `/${resolution}/index.m3u8`,
         type: "application/x-mpegURL",
       },
     ],
@@ -54,6 +57,9 @@ export default function page() {
                 {resolution}
               </DropdownMenuTrigger>
               <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => setResolution("Auto")}>
+                  Auto
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setResolution("1080p")}>
                   1080p
                 </DropdownMenuItem>
