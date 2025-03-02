@@ -1,11 +1,3 @@
-// change sqs visibility
-// retrieve video from s3
-// transcode video
-// push video to new s3
-// delete video from s3
-// delete message from sqs
-// trigger lambda server to send mail
-
 require("dotenv").config();
 
 const fs = require("fs");
@@ -127,6 +119,11 @@ async function transcoder() {
   // Execute all Upload promises
   await Promise.all(uploadPromises).then(async () => {
     console.log("Uploading Done Successfully");
+  });
+  await putObject({
+    Bucket,
+    Key: `${Key}/master.m3u8`,
+    path: path.join(__dirname, "master.m3u8"),
   });
 
   // delete video from buffer bucket
