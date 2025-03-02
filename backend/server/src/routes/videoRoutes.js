@@ -80,7 +80,12 @@ router.post(
     console.log(key);
     const { email, url, name } = await videoControllers.addVideo({ key });
     await successMail(email, name);
-    res.send("success");
+    res
+      .status(200)
+      .send({
+        success: true,
+        message: "Video transcoding completed and Email send successfully",
+      });
   })
 );
 
