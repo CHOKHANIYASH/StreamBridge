@@ -19,7 +19,7 @@ router.get(
 
 router.get(
   "/user/:userId",
-  // isValidUser,
+  isValidUser,
   handleAsyncError(async (req, res) => {
     const { userId } = req.params;
     const { response, status } = await videoControllers.getUserVideos({
@@ -40,7 +40,7 @@ router.get(
 
 router.post(
   "/upload",
-  // isValidUser,
+  isValidUser,
   handleAsyncError(async (req, res) => {
     const { contentType, userId, name, email } = req.body;
     if (!userId) throw new AppError("User not found", 404);
@@ -62,7 +62,7 @@ router.post(
 
 router.post(
   "/delete/:videoId",
-  // isValidUser,
+  isValidUser,
   handleAsyncError(async (req, res) => {
     const { videoId } = req.params;
     const { response, status } = await videoControllers.deleteVideo({

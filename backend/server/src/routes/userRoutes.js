@@ -42,7 +42,7 @@ router.post(
 
 router.post(
   "/delete",
-  // isValidUser,
+  isValidUser,
   handleAsyncError(async (req, res) => {
     const userId = req.body.userId;
     if (!userId) throw new AppError("User Id is required", 400);
