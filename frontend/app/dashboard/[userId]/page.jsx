@@ -53,6 +53,7 @@ function Dashboard() {
       const accessToken = await getAccessToken();
       await axios.post(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/video/delete/${videoId}`,
+        { userId },
         {
           headers: {
             access_token: accessToken,

@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import ProtectedRoute from "@/app/ProtectedRoute";
 function Upload() {
   const [files, setFiles] = useState([]);
-  const { userId } = useContext(AuthContext);
+  const { userId, getAccessToken } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [submit, setSubmit] = useState(false);
   // console.log(userId);
@@ -29,12 +29,18 @@ function Upload() {
     await Promise.all(
       files.map(async (file) => {
         try {
+          const accessToken = await getAccessToken();
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_SERVER_URL}/video/upload`,
             {
               contentType: file.type,
               name: file.name.substring(0, file.name.length - 4),
               userId,
+            },
+            {
+              headers: {
+                access_token: accessToken,
+              },
             }
           );
           const { url } = response.data.data;
@@ -50,6 +56,7 @@ function Upload() {
           console.error(`Error uploading file ${file.name}:`, error);
           toast.error(`Error uploading file ${file.name}`);
         }
+        toast.success(`You will recieve an email once the video is processed!`);
       })
     );
     setFiles([]);
