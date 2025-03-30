@@ -16,6 +16,8 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { setIsAuthenticated, setUserId } = useContext(AuthContext);
+  const testEmail = process.env.NEXT_PUBLIC_TEST_EMAIL;
+  const testPassword = process.env.NEXT_PUBLIC_TEST_PASSWORD;
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -37,6 +39,7 @@ export default function Login() {
       toast.error(err.message, {
         toastId: "uniqueToastLogin",
       });
+      setLoading(false);
     }
     console.log("Form submitted");
   };
@@ -88,6 +91,19 @@ export default function Login() {
           ) : (
             <Loader type="spinner-circle" bgColor={"#000000"} size={50} />
           )}
+          <button
+            className="p-[3px] relative mt-2"
+            onClick={() => {
+              setEmail(testEmail);
+              setPassword(testPassword);
+            }}
+            type="submit"
+          >
+            <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500" />
+            <div className="px-6 py-1  bg-black rounded-[6px]  relative group transition duration-200 text-white hover:bg-transparent">
+              Test User
+            </div>
+          </button>
         </form>
       </div>
     </div>

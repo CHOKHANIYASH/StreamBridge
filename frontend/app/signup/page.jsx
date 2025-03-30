@@ -90,6 +90,7 @@ export default function Signup() {
       toast.error("Signup failed. Please try again.", {
         toastId: "uniqueToastSignup",
       });
+      setLoading(false);
     }
   };
   return (
