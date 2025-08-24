@@ -41,7 +41,7 @@ export const FileUpload = ({ onChange, submit }) => {
       return;
     }
     if (newFiles[0].type === "video/mp4") {
-      setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+      setFiles(newFiles);
     }
 
     onChange && onChange(newFiles);
