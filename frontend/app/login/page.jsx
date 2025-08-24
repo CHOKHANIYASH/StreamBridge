@@ -2,10 +2,11 @@
 import React, { useState, useContext } from "react";
 import { useRouter } from "next/navigation";
 import { Label } from "@/components/ui/label";
-import { Input } from "/components/ui/input";
+import { Input } from "@/components/ui/input";
+import SubmitButton from "@/components/utils/SubmitButton";
+import LabelInputContainer from "@/components/utils/LabelInputContainer";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import Loader from "react-js-loader";
 import { signIn, getCurrentUser } from "aws-amplify/auth";
 import { AuthContext } from "../AuthContext";
 import { toast } from "react-toastify";
@@ -27,7 +28,6 @@ export default function Login() {
         password,
       });
       const user = await getCurrentUser();
-      setLoading(false);
       setIsAuthenticated(true);
       setUserId(user.userId);
       toast.success("Login Successful", {
@@ -39,6 +39,7 @@ export default function Login() {
       toast.error(err.message, {
         toastId: "uniqueToastLogin",
       });
+    } finally {
       setLoading(false);
     }
     console.log("Form submitted");
@@ -80,17 +81,8 @@ export default function Login() {
             />
           </LabelInputContainer>
 
-          {!loading ? (
-            <button
-              className="bg-gradient-to-br relative group/btn from-black  to-neutral-600 block d w-full text-white rounded-md h-10 font-medium shadow-[0px_1px_0px_0px_#ffffff40_inset,0px_-1px_0px_0px_#ffffff40_inset]"
-              type="submit"
-            >
-              Sign in &rarr;
-              <BottomGradient />
-            </button>
-          ) : (
-            <Loader type="spinner-circle" bgColor={"#000000"} size={50} />
-          )}
+          <SubmitButton loading={loading} label="Sign in" />
+
           <button
             className="p-[3px] relative mt-2"
             onClick={() => {
@@ -109,20 +101,3 @@ export default function Login() {
     </div>
   );
 }
-
-const BottomGradient = () => {
-  return (
-    <>
-      <span className="absolute inset-x-0 block w-full h-px transition duration-500 opacity-0 group-hover/btn:opacity-100 -bottom-px bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
-      <span className="absolute block w-1/2 h-px mx-auto transition duration-500 opacity-0 group-hover/btn:opacity-100 blur-sm -bottom-px inset-x-10 bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
-    </>
-  );
-};
-
-const LabelInputContainer = ({ children, className }) => {
-  return (
-    <div className={cn("flex flex-col space-y-2 w-full", className)}>
-      {children}
-    </div>
-  );
-};
