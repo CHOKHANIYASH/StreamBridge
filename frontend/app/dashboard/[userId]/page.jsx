@@ -5,6 +5,7 @@ import axios from "axios";
 import { AuthContext } from "@/app/AuthContext";
 import { toast } from "react-toastify";
 import ProtectedRoute from "@/app/ProtectedRoute";
+import axiosRequest from "@/lib/axiosRequest";
 import {
   Table,
   TableBody,
@@ -19,53 +20,49 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getCurrentUser } from "aws-amplify/auth";
 function Dashboard() {
   const router = useRouter();
   const { userId, getAccessToken } = React.useContext(AuthContext);
   const [videos, setVideos] = useState([]);
+  const [processingVideos, setProcessingVideos] = useState([]);
+
   useEffect(() => {
     if (!userId) return;
-
     const fetchVideos = async () => {
-      try {
-        const accessToken = await getAccessToken();
-        const response = await axios.get(
-          `${process.env.NEXT_PUBLIC_SERVER_URL}/video/user/${userId}`,
-          {
-            headers: {
-              access_token: accessToken,
-            },
-          }
-        );
-        setVideos(response.data.data.videos);
-      } catch (error) {
-        console.error("Error fetching videos:", error);
-        toast.error("Error fetching videos");
-      }
+      const { data } = await axiosRequest({
+        url: `/videos/user/${userId}`,
+        errorMessage: "Error fetching videos",
+      });
+      // const repeated = Array(30).fill(data).flat();
+      // setVideos(repeated);
+      setVideos(data);
     };
 
+    const fetchVideosInProgress = async () => {
+      const { data } = await axiosRequest({
+        url: `/videos/user/buffer/${userId}`,
+        errorMessage: "Error fetching videos in progress",
+      });
+      setProcessingVideos(data);
+    };
     fetchVideos();
+    fetchVideosInProgress();
   }, [userId]);
-  // const router = useRouter();
+
   const [name, setName] = useState("");
   const handleDelete = async (videoId) => {
-    try {
-      const accessToken = await getAccessToken();
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_SERVER_URL}/video/delete/${videoId}`,
-        { userId },
-        {
-          headers: {
-            access_token: accessToken,
-          },
-        }
-      );
-      setVideos(videos.filter((video) => video.id !== videoId));
-      toast.success("Video deleted successfully");
-    } catch (error) {
-      console.log(error);
-      toast.error("Error deleting video");
-    }
+    const accessToken = await getAccessToken();
+    await axiosRequest({
+      url: `/videos`,
+      method: "delete",
+      auth: true,
+      accessToken,
+      data: { id: videoId },
+      errorMessage: "Error fetching videos",
+    });
+    setVideos(videos.filter((video) => video.id !== videoId));
+    toast.success("Video deleted successfully");
   };
   const copyTextToClipboard = async (text) => {
     if ("clipboard" in navigator) {
@@ -77,12 +74,12 @@ function Dashboard() {
   };
   return (
     <>
-      <h1 className="mx-2 text-2xl font-semibold text-deepCharcoal">
+      <h1 className="m-5 text-2xl font-semibold text-deepCharcoal">
         Dashboard
       </h1>
       <h1 className="mx-2 text-2xl font-semibold text-deepCharcoal">{name}</h1>
 
-      <div className="flex items-center justify-between h-screen">
+      <div className="flex flex-col items-center m-2">
         <div className="w-3/4 mx-auto bg-white border-2 border-gray-200 rounded-lg">
           <Table>
             <TableHeader>
@@ -105,56 +102,10 @@ function Dashboard() {
                     <TableCell>{video.createdAt}</TableCell>
                     <TableCell>
                       <div>
-                        <DropdownMenu className="">
-                          <DropdownMenuTrigger className="p-1 mr-2 text-sm text-white transition duration-200 transform border rounded-md border-neutral-300 bg-royalBlue hover:-translate-y-1 hover:shadow-md">
-                            Copy Url
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                copyTextToClipboard(`${video.url}/master.m3u8`)
-                              }
-                            >
-                              Auto
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                copyTextToClipboard(
-                                  `${video.url}/1080p/index.m3u8`
-                                )
-                              }
-                            >
-                              1080p
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                copyTextToClipboard(
-                                  `${video.url}/720p/index.m3u8`
-                                )
-                              }
-                            >
-                              720p
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                copyTextToClipboard(
-                                  `${video.url}/480p/index.m3u8`
-                                )
-                              }
-                            >
-                              480p
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                copyTextToClipboard(
-                                  `${video.url}/360p/index.m3u8`
-                                )
-                              }
-                            >
-                              360p
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <CopyUrlButton
+                          video={video}
+                          copyTextToClipboard={copyTextToClipboard}
+                        />
                       </div>
                     </TableCell>
                     <TableCell>
@@ -196,8 +147,72 @@ function Dashboard() {
             </TableBody>
           </Table>
         </div>
+        {processingVideos.length > 0 ? (
+          <div className="w-3/4 mt-20 ">
+            <h1 className="mb-2 text-lg font-semibold text-deepCharcoal">
+              Videos in process
+            </h1>
+            <div className="w-1/2 bg-white border-2 border-gray-200 rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {processingVideos.map((v) => (
+                    <TableRow key={v.videoId}>
+                      <TableCell>{v.name}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        ) : null}
       </div>
     </>
   );
 }
 export default ProtectedRoute(Dashboard);
+
+const CopyUrlButton = ({ video, copyTextToClipboard }) => {
+  return (
+    <>
+      <DropdownMenu className="">
+        <DropdownMenuTrigger className="p-1 mr-2 text-sm text-white transition duration-200 transform border rounded-md border-neutral-300 bg-royalBlue hover:-translate-y-1 hover:shadow-md">
+          Copy Url
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem
+            onClick={() => copyTextToClipboard(`${video.url}/master.m3u8`)}
+          >
+            Auto
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => copyTextToClipboard(`${video.url}/1080p/index.m3u8`)}
+          >
+            1080p
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => copyTextToClipboard(`${video.url}/720p/index.m3u8`)}
+          >
+            720p
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => copyTextToClipboard(`${video.url}/480p/index.m3u8`)}
+          >
+            480p
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => copyTextToClipboard(`${video.url}/360p/index.m3u8`)}
+          >
+            360p
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
+  );
+};
+
+const InProcessVideos = () => {};
