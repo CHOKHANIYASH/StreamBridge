@@ -128,7 +128,7 @@ async function transcoder() {
 
   // delete video from buffer bucket
   await deleteObject({ Bucket: bufferBucket, Key });
-  await axios.post(`${process.env.SERVER_URL}/video/success`, {
+  await axios.post(`${process.env.SERVER_URL}/videos/success`, {
     key: Key,
     adminCode: process.env.ADMIN_CODE,
   });
@@ -141,7 +141,7 @@ transcoder()
   })
   .catch(async (err) => {
     console.error("Error occurred:", err);
-    await axios.post(`${process.env.SERVER_URL}/video/fail`, {
+    await axios.post(`${process.env.SERVER_URL}/videos/fail`, {
       key: Key,
       adminCode: process.env.ADMIN_CODE,
     });
