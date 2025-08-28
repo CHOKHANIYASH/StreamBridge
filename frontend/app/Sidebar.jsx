@@ -83,7 +83,11 @@ export default function SideBar({ children }) {
             {open ? <Logo /> : <IconVideo />}
             <div className="flex flex-col gap-2 mt-8 ">
               {links.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
+                <SidebarLink
+                  key={idx}
+                  link={link}
+                  onClick={() => setOpen(false)}
+                />
               ))}
             </div>
           </div>
